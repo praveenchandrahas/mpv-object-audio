@@ -1,0 +1,24 @@
+#!/bin/bash
+# mpv-atmos: mpv-omniphony with live Atmos decode/render and video tuning for a 1080p projector.
+# Reference copy of the wrapper as built in Sep 2026. Adjust the paths to your own build (see docs/omniphony-debugging.md).
+OMNI="$HOME/HomeTheatre/Omniphony/mpv-omniphony-v0.4.2-linux-x86_64"
+exec "$OMNI/mpv-omniphony/build/mpv-v0.41.0/_b/mpv" \
+  --ad=orender \
+  --ad-orender-library="$HOME/.local/share/omniphony/lib/liborender.so.0" \
+  --ad-orender-bridge-path="$OMNI/libharletty_bridge.so" \
+  --hwdec=vaapi \
+  --vo=gpu-next \
+  --gpu-api=vulkan \
+  --target-prim=bt.709 \
+  --target-trc=bt.1886 \
+  --target-peak=60 \
+  --tone-mapping=bt.2390 \
+  --dscale=mitchell \
+  --correct-downscaling=yes \
+  --linear-downscaling=yes \
+  --deband=yes \
+  --cache=yes \
+  --demuxer-max-bytes=512MiB \
+  "$@"
+# The trajectory-overlay-off script (scripts/mpv-atmos-overlay-off.lua) is auto-loaded from ~/.config/mpv/scripts/.
+# Do NOT also pass it with --script=: it would load twice and the two toggles would cancel.
