@@ -1,6 +1,8 @@
 #!/bin/bash
 # mpv-atmos: mpv-omniphony with live Atmos decode/render and video tuning for a 1080p projector.
 # Reference copy of the wrapper as built in Sep 2026. Adjust the paths to your own build (see docs/omniphony-debugging.md).
+# Make sure CamillaDSP and the router are running (no-op when they already are).
+command -v eq >/dev/null && eq ensure
 OMNI="$HOME/HomeTheatre/Omniphony/mpv-omniphony-v0.4.2-linux-x86_64"
 exec "$OMNI/mpv-omniphony/build/mpv-v0.41.0/_b/mpv" \
   --ad=orender \
