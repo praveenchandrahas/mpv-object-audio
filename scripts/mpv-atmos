@@ -3,8 +3,13 @@
 # Reference copy of the wrapper as built in Sep 2026. Adjust the paths to your own build (see docs/omniphony-debugging.md).
 # Make sure CamillaDSP and the router are running (no-op when they already are).
 command -v eq >/dev/null && eq ensure
+# Pick the CamillaDSP profile for this file (Atmos = film, 5.1 = bed upmix, stereo = stereo upmix) before mpv starts, so nothing
+# switches mid-film. The daemon keeps checking through the IPC socket below (next episode, another audio track).
+FILE=""; for a in "$@"; do case "$a" in -*) ;; *) FILE="$a" ;; esac; done
+[ -n "$FILE" ] && command -v eq >/dev/null && eq prepare "$FILE"
 OMNI="$HOME/HomeTheatre/Omniphony/mpv-omniphony-v0.4.2-linux-x86_64"
 exec "$OMNI/mpv-omniphony/build/mpv-v0.41.0/_b/mpv" \
+  --input-ipc-server="${THEATER_MPV_SOCK:-${XDG_RUNTIME_DIR:-/tmp}/theater-mpv.sock}" \
   --ad=orender \
   --ad-orender-library="$HOME/.local/share/omniphony/lib/liborender.so.0" \
   --ad-orender-bridge-path="$OMNI/libharletty_bridge.so" \
