@@ -12,8 +12,10 @@ BRIDGES="$OA_HOME/lib/libharletty_dolby_bridge.so:$OA_HOME/lib/libharletty_dts_b
 
 case "${1:-}" in
   --oa-check)
-    exec "$OA_HOME/bin/mpv" --no-config --ao=null --vo=null --length=1 -v --ad=orender --ad-orender-library="$OA_HOME/lib/liborender.so.0" \
-      --ad-orender-bridge-path="$BRIDGES" av://lavfi:sine </dev/null 2>&1 | grep -i -E "liborender|bridge" ;;
+    # No `exec` here: inside a pipeline it only replaces a subshell, and the script would carry on and start the player with --oa-check.
+    "$OA_HOME/bin/mpv" --no-config --ao=null --vo=null --length=1 -v --ad=orender --ad-orender-library="$OA_HOME/lib/liborender.so.0" \
+      --ad-orender-bridge-path="$BRIDGES" av://lavfi:sine </dev/null 2>&1 | grep -i -E "loaded liborender|bridge"
+    exit 0 ;;
   --oa-info)
     cat "$OA_HOME/VERSIONS" 2>/dev/null
     echo "mpv:     $OA_HOME/bin/mpv"
