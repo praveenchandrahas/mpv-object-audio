@@ -1,0 +1,53 @@
+#!/bin/bash
+# mpv-object-audio: the Omniphony player (mpv + live object rendering) with the theatre's video tuning for the 1080p projector.
+# Installed by object-audio-install.sh. Completely independent of mpv-atmos: its own mpv binary, engine, bridges and config folder.
+#   mpv-object-audio FILE...        play
+#   mpv-object-audio --oa-info      show what it would run and whether the bridges load
+#   mpv-object-audio --oa-check     the same bridge check, nothing else
+# Environment: OA_HOME (install folder), OBJECT_AUDIO_DSP=0 to skip the CamillaDSP profile switching below.
+OA_HOME="${OA_HOME:-$HOME/.local/opt/mpv-object-audio}"
+CONF="$HOME/.config/mpv-object-audio"
+BRIDGES="$OA_HOME/lib/libharletty_dolby_bridge.so:$OA_HOME/lib/libharletty_dts_bridge.so:$OA_HOME/lib/libharletty_iamf_bridge.so"
+[ -x "$OA_HOME/bin/mpv" ] || { echo "mpv-object-audio is not installed (no $OA_HOME/bin/mpv). Run scripts/object-audio-install.sh" >&2; exit 1; }
+
+case "${1:-}" in
+  --oa-check) ORENDER_BRIDGE_FILE="$BRIDGES" exec "$OA_HOME/bin/orender" check-bridges ;;
+  --oa-info)
+    cat "$OA_HOME/VERSIONS" 2>/dev/null
+    echo "mpv:     $OA_HOME/bin/mpv"
+    echo "engine:  $OA_HOME/lib/liborender.so.0"
+    echo "config:  $CONF"
+    ORENDER_BRIDGE_FILE="$BRIDGES" "$OA_HOME/bin/orender" check-bridges 2>&1 | head -8
+    exit 0 ;;
+esac
+
+# Same theatre hooks as mpv-atmos, so the DSP profile (film / bed upmix / stereo upmix) is chosen before playback starts. They are no-ops
+# when the `eq` command is missing. The router matches PipeWire's "mpv" node, which this build keeps (default --audio-client-name).
+if [ "${OBJECT_AUDIO_DSP:-1}" != 0 ] && command -v eq >/dev/null 2>&1; then
+  eq ensure
+  FILE=""; for a in "$@"; do case "$a" in -*) ;; *) FILE="$a" ;; esac; done
+  [ -n "$FILE" ] && eq prepare "$FILE"
+fi
+
+# --config-dir keeps this player out of ~/.config/mpv (mpv-atmos and plain mpv). The bridge list is passed explicitly, so a bridge named in
+# the shared ~/.config/omniphony/config.yaml, or one in ~/.local/share/omniphony/lib, never gets loaded instead of this build's own.
+exec "$OA_HOME/bin/mpv" \
+  --config-dir="$CONF" \
+  --input-ipc-server="${THEATER_MPV_SOCK:-${XDG_RUNTIME_DIR:-/tmp}/theater-mpv.sock}" \
+  --ad=orender \
+  --ad-orender-library="$OA_HOME/lib/liborender.so.0" \
+  --ad-orender-bridge-path="$BRIDGES" \
+  --hwdec=vaapi \
+  --vo=gpu-next \
+  --gpu-api=vulkan \
+  --target-prim=bt.709 \
+  --target-trc=bt.1886 \
+  --target-peak=60 \
+  --tone-mapping=bt.2390 \
+  --dscale=mitchell \
+  --correct-downscaling=yes \
+  --linear-downscaling=yes \
+  --deband=yes \
+  --cache=yes \
+  --demuxer-max-bytes=512MiB \
+  "$@"
