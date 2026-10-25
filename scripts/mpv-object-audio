@@ -3,7 +3,7 @@
 # Installed by object-audio-install.sh. Completely independent of mpv-atmos: its own mpv binary, engine, bridges and config folder.
 #   mpv-object-audio FILE...        play
 #   mpv-object-audio --oa-info      show what it would run and whether the bridges load
-#   mpv-object-audio --oa-check     the same bridge check, nothing else
+#   mpv-object-audio --oa-check     play a test tone through the engine and show the engine/bridge log lines
 # Environment: OA_HOME (install folder), OBJECT_AUDIO_DSP=0 to skip the CamillaDSP profile switching below.
 OA_HOME="${OA_HOME:-$HOME/.local/opt/mpv-object-audio}"
 CONF="$HOME/.config/mpv-object-audio"
@@ -11,13 +11,15 @@ BRIDGES="$OA_HOME/lib/libharletty_dolby_bridge.so:$OA_HOME/lib/libharletty_dts_b
 [ -x "$OA_HOME/bin/mpv" ] || { echo "mpv-object-audio is not installed (no $OA_HOME/bin/mpv). Run scripts/object-audio-install.sh" >&2; exit 1; }
 
 case "${1:-}" in
-  --oa-check) ORENDER_BRIDGE_FILE="$BRIDGES" exec "$OA_HOME/bin/orender" check-bridges ;;
+  --oa-check)
+    exec "$OA_HOME/bin/mpv" --no-config --ao=null --vo=null --length=1 -v --ad=orender --ad-orender-library="$OA_HOME/lib/liborender.so.0" \
+      --ad-orender-bridge-path="$BRIDGES" av://lavfi:sine </dev/null 2>&1 | grep -i -E "liborender|bridge" ;;
   --oa-info)
     cat "$OA_HOME/VERSIONS" 2>/dev/null
     echo "mpv:     $OA_HOME/bin/mpv"
     echo "engine:  $OA_HOME/lib/liborender.so.0"
     echo "config:  $CONF"
-    ORENDER_BRIDGE_FILE="$BRIDGES" "$OA_HOME/bin/orender" check-bridges 2>&1 | head -8
+    "$0" --oa-check | head -8
     exit 0 ;;
 esac
 
