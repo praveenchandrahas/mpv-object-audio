@@ -1,10 +1,18 @@
 # mpv-object-audio
 
+![mpv-object-audio: live object audio on Linux. Installer and wrapper for immersive audio and video playback](docs/img/banner.png)
+
 > **Part of the [Software Defined Home Theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.** The main repository holds the documentation, build log, results and the installer checks; this is one of its parts. Sibling repositories: [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) · [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) · [Roomtone](https://github.com/praveenchandrahas/Roomtone).
 
 An installer and wrapper that gives a Linux machine a self-contained **live Dolby Atmos / DTS:X player**: the Omniphony object renderer, the harletty-bridge decoders and a patched mpv,
 installed in their own folder and started as the `mpv-object-audio` command, with a video configuration tuned for a 1080p projector (VAAPI, gpu-next on Vulkan, BT.709/BT.1886,
 60 nit target peak, bt.2390 tone mapping, mitchell downscaling, deband).
+
+## Architecture
+
+![mpv-object-audio architecture: audio data path, video data path, installer and integration](docs/img/architecture.png)
+
+*Conceptual diagram. This repository installs and wraps upstream decoding and rendering components (Omniphony, mpv-omniphony, harletty-bridge); it does not implement a new Atmos or DTS:X decoder or renderer. The DSP step (`eq ensure`, `eq prepare FILE` from linux-theater-dsp) is optional: set `OBJECT_AUDIO_DSP=0` to disable it.*
 
 ```bash
 git clone https://github.com/praveenchandrahas/mpv-object-audio && cd mpv-object-audio
