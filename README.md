@@ -39,5 +39,25 @@ The hard part, decoding and rendering Atmos objects live on Linux, is the work o
 **[harletty-bridge](https://github.com/harletty/harletty-bridge)** by harletty (the decoder plugins), and **[truehdd](https://github.com/truehdd/truehdd)** by Rainbaby (the TrueHD decoder that harletty's decoder is a fork of).
 This repository only installs them and wraps mpv; their licences apply to what they provide and are not summarised here.
 
----
-Part of the [software-defined home theatre](https://github.com/praveenchandrahas/sdht) project. Licensed under the [Apache License 2.0](LICENSE).
+## Third-party licences
+
+The installer downloads other projects; they keep their own licences (this repository contains none of their code, and its Apache-2.0 licence does not change theirs):
+
+| Component | Licence (as stated by the project; check the version you install) |
+|---|---|
+| [Omniphony](https://github.com/mgth/Omniphony) engine | GPL-3.0-or-later (its README); decoder bridges are loaded at run time and "may be licensed separately" |
+| [harletty-bridge](https://github.com/harletty/harletty-bridge) | not checked here: see its LICENSE |
+| [mpv-omniphony](https://github.com/mgth/mpv-omniphony) | not checked here: an mpv fork, so GPL/LGPL-family; see its LICENSE |
+| [truehdd](https://github.com/truehdd/truehdd) (the decoder harletty's is a fork of) | Apache-2.0 |
+| [mpv](https://mpv.io) | GPL-2.0-or-later by default, LGPL-2.1-or-later when built that way (mpv's documentation) |
+
+## Adapting it to your system
+
+Paths and user names in the docs and in `scripts/mpv-atmos` are from the author's machine, and the video settings in the wrapper target a 1080p projector (60 nit peak, BT.1886).
+Change them for your display and install folder (`OA_HOME`).
+
+## Licence
+
+[Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE)). Dolby, Dolby Atmos, DTS and DTS:X are trademarks of their owners; this project is not affiliated with or endorsed by them. It contains no media files and no decoder code.
+
+Part of the [software-defined home theatre](https://github.com/praveenchandrahas/sdht) project.
