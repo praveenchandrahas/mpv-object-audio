@@ -1,6 +1,6 @@
 # mpv-object-audio
 
-> **Part of the [Software Defined Home Theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.** The main repository holds the documentation, build log, results and the installer checks; this is one of its parts. Sibling repositories: [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) · [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) · [theater-measurement](https://github.com/praveenchandrahas/theater-measurement).
+> **Part of the [Software Defined Home Theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.** The main repository holds the documentation, build log, results and the installer checks; this is one of its parts. Sibling repositories: [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) · [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) · [Roomtone](https://github.com/praveenchandrahas/Roomtone).
 
 An installer and wrapper that gives a Linux machine a self-contained **live Dolby Atmos / DTS:X player**: the Omniphony object renderer, the harletty-bridge decoders and a patched mpv,
 installed in their own folder and started as the `mpv-object-audio` command, with a video configuration tuned for a 1080p projector (VAAPI, gpu-next on Vulkan, BT.709/BT.1886,
@@ -64,15 +64,6 @@ Change them for your display and install folder (`OA_HOME`).
 
 Part of the [software-defined home theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.
 
-## On-screen status and controls (theater_status.lua)
+## On-screen status and controls
 
-`scripts/theater_status.lua` adds an overlay to mpv. Press **C** and one panel opens: the status first (source, route, profile, engine, CamillaDSP load,
-clipping and underruns), then one row per setting showing its current value: EQ, profile mode, stereo flavour, 5.1 flavour, adaptive engine. Up/Down select a row;
-Enter, Right or a click steps it to the next value and Left to the previous; Esc or C closes. The panel stays open and re-reads the status, so each row shows
-what the router reports after a change. It runs the `eq` command, so the router stays the only thing that changes the audio; with `theater-ctld`
-(linux-theater-dsp) running the panel also shows the live DSP numbers, otherwise it uses `eq status --json`. Changes that cost about a second of silence, and
-`eq off`, always ask for a second confirmation showing from -> to, because mpv is playing whenever the panel is open. The panel is drawn by the script itself (not uosc).
-
-Install: `./scripts/install-theater-status.sh` (copies the script into `~/.config/mpv` and `~/.config/mpv-object-audio`; `--bindings` also adds the `c` key
-to each `input.conf`, replacing the F9/F10 lines an earlier version added; `remove` undoes both). Options in `script-opts/theater_status.conf`: `eq`, `ctl_url`, `refresh`.
-Tested under a mocked mpv API only (`tests/test_theater_status.py`, needs `pip install lupa`); how it looks and behaves in the real player is unverified.
+The status panel and controls for mpv (press **C**) moved to [Roomtone](https://github.com/praveenchandrahas/Roomtone) (`overlay/`), next to the status page it shares its code path with. Install it from there.
