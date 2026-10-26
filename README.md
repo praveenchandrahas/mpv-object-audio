@@ -66,12 +66,13 @@ Part of the [software-defined home theatre](https://github.com/praveenchandrahas
 
 ## On-screen status and controls (theater_status.lua)
 
-`scripts/theater_status.lua` adds an overlay to mpv: **F9** toggles a status panel (source, route, profile, engine, CamillaDSP load, clipping and
-underruns) and **F10** opens a control menu (EQ on/off, profile mode, upmix flavours, adaptive engine). It runs the `eq` command, so the router stays the only
-thing that changes the audio; with `theater-ctld` running (linux-theater-dsp) the panel also shows the live DSP numbers, otherwise it uses `eq status --json`.
-With uosc installed the menu is uosc's (mouse and keyboard); otherwise a built-in menu is drawn (arrow keys, Enter, Esc, mouse wheel and click). Changes that
-cost about a second of silence, and `eq off`, always ask for a second confirmation, because mpv is playing whenever the menu is open.
+`scripts/theater_status.lua` adds an overlay to mpv. Press **C** and one panel opens: the status first (source, route, profile, engine, CamillaDSP load,
+clipping and underruns), then one row per setting showing its current value: EQ, profile mode, stereo flavour, 5.1 flavour, adaptive engine. Up/Down select a row;
+Enter, Right or a click steps it to the next value and Left to the previous; Esc or C closes. The panel stays open and re-reads the status, so each row shows
+what the router reports after a change. It runs the `eq` command, so the router stays the only thing that changes the audio; with `theater-ctld`
+(linux-theater-dsp) running the panel also shows the live DSP numbers, otherwise it uses `eq status --json`. Changes that cost about a second of silence, and
+`eq off`, always ask for a second confirmation showing from -> to, because mpv is playing whenever the panel is open. The panel is drawn by the script itself (not uosc).
 
-Install: `./scripts/install-theater-status.sh` (copies the script into `~/.config/mpv` and `~/.config/mpv-object-audio`; `--bindings` also adds the two keys
-to each `input.conf`; `remove` undoes both). Options in `script-opts/theater_status.conf`: `eq`, `ctl_url`, `menu=auto|uosc|builtin`, `refresh`.
+Install: `./scripts/install-theater-status.sh` (copies the script into `~/.config/mpv` and `~/.config/mpv-object-audio`; `--bindings` also adds the `c` key
+to each `input.conf`, replacing the F9/F10 lines an earlier version added; `remove` undoes both). Options in `script-opts/theater_status.conf`: `eq`, `ctl_url`, `refresh`.
 Tested under a mocked mpv API only (`tests/test_theater_status.py`, needs `pip install lupa`); how it looks and behaves in the real player is unverified.

@@ -88,57 +88,55 @@ def _py(x):
 api, calls, msgs, bindings, osd, overlay, st, lua = world()
 api.state.status = lua.table_from(STATUS, recursive=True)
 text = "\n".join(api.lines_for_panel().values())
-check("panel shows source, path, profile, engine and DSP numbers", all(s in text for s in ("truehd 8ch -> film", "through CamillaDSP", "film  (mode auto)", "Engine: on", "load 8%", "underruns/min 0")), text)
+check("status lines show source, path, profile, engine and DSP numbers", all(s in text for s in ("truehd 8ch -> film", "through CamillaDSP", "film  (mode auto)", "Engine: on", "load 8%", "underruns/min 0")), text)
 check("ASS escaping neutralises braces and backslashes", "{" not in api.esc("a{b}\\c").replace("\\{", "") and "\\{" in api.esc("{"))
 api.state.status = lua.table_from({"eq": {"switch": "off"}, "dsp": {}, "mpv": {}}, recursive=True)
 check("a sparse status does not crash the panel", "OFF" in "\n".join(api.lines_for_panel().values()))
 
-# ---- action table and guards
+# ---- rows: current value, next value, guards
 api, calls, msgs, bindings, osd, overlay, st, lua = world()
 api.state.status = lua.table_from(STATUS, recursive=True)
-items = list(api.build_items().values())
-titles = [i["title"] for i in items]
-check("menu offers EQ, mode, both flavours and the engine", "EQ off (louder)" in titles and "Mode: stereo" in titles and "Stereo flavour: wide" in titles and "5.1 flavour: subtle" in titles and "Adaptive engine off" in titles, str(titles))
-check("the current values are marked active", [i["title"] for i in items if i["active"]] == ["EQ on", "Mode: auto", "Stereo flavour: balanced", "5.1 flavour: balanced", "Adaptive engine on"])
-check("every item that restarts or changes loudness is marked risky; EQ on is not", all(i["risky"] for i in items if i["title"] != "EQ on"))
-check("argv are fixed lists of enum words only", all(all(a.isalnum() for a in list(i["args"].values())) for i in items))
-# perform
-api.perform(items[3])        # Mode: film
+items = list(api.build_items(1).values())
+check("one row each for EQ, mode, both flavours and the engine, showing current values",
+      [(i["label"], i["value"]) for i in items] == [("EQ", "on"), ("Profile mode", "auto"), ("Stereo flavour", "balanced"), ("5.1 flavour", "balanced"), ("Adaptive engine", "on")], str([(i["label"], i["value"]) for i in items]))
+check("next values step through the lists", [i["next"] for i in items] == ["off", "film", "wide", "wide", "off"], str([i["next"] for i in items]))
+back = list(api.build_items(-1).values())
+check("previous values wrap round", [i["next"] for i in back] == ["off", "bed", "voice", "subtle", "off"], str([i["next"] for i in back]))
+check("only EQ going on is unrisky; EQ off, mode, flavours and engine ask first", [i["risky"] for i in items] == [True, True, True, True, True])
+api.state.status = lua.table_from({"eq": {"switch": "off"}, "dsp": {}, "mpv": {}}, recursive=True)
+eqrow = list(api.build_items(1).values())[0]
+check("with EQ off, the EQ row steps to on and does not ask", eqrow["next"] == "on" and not eqrow["risky"])
+check("argv are fixed lists of enum words only", all(all(a.isalnum() for a in list(i["args"].values())) for i in list(api.build_items(1).values())))
+api.state.status = lua.table_from(STATUS, recursive=True)
+items = list(api.build_items(1).values())
+api.perform(items[1])
 check("perform runs `eq mode film` and nothing else", [c for c in calls if c[0] == "/bin/eq" and c[1] != "status"] == [["/bin/eq", "mode", "film"]], str(calls))
-n = len(calls); api.perform(items[0])
-check("an already-active item runs nothing", len(calls) == n and "already set" in osd[-1])
 
-# ---- built-in menu: keyboard flow with confirmation
-api, calls, msgs, bindings, osd, overlay, st, lua = world(uosc=False)
+# ---- the panel: status first, rows below, stays open and reflects the router
+api, calls, msgs, bindings, osd, overlay, st, lua = world()
 api.open_menu()
-check("builtin menu opens (no uosc) and binds the keys", api.state.menu and "theater-menu-ENTER" in bindings and not msgs)
-for _ in range(2): bindings["theater-menu-DOWN"]()        # EQ on(1, active start) -> EQ off(2) -> Mode auto(3)? start sel is first active = 1
-api.state.sel = 2                                          # EQ off
+check("C opens one panel: status lines, then CONTROLS rows with their values; the keys are bound",
+      api.state.menu and "theater-menu-ENTER" in bindings and overlay.data.index("THEATRE") < overlay.data.index("CONTROLS") < overlay.data.index("Profile mode") and "balanced" in overlay.data and not msgs)
+bindings["theater-menu-DOWN"]()
+check("Down moves the selection to the second row", api.state.sel == 2)
 bindings["theater-menu-ENTER"]()
-check("a risky item asks for confirmation first (nothing run yet)", api.state.pending is not None and not [c for c in calls if c[1:2] == ["off"]] and "louder" in overlay.data)
+check("a risky step asks first and shows from -> to (nothing run yet)", api.state.pending is not None and "auto -> film" in overlay.data and not [c for c in calls if c[1:2] == ["mode"]])
 bindings["theater-menu-ESC"]()
-check("Esc cancels the confirmation and keeps the menu open", api.state.pending is None and api.state.menu)
-bindings["theater-menu-ENTER"](); bindings["theater-menu-ENTER"]()
-check("Enter twice runs `eq off` and closes the menu", [c for c in calls if c[1:2] == ["off"]] == [["/bin/eq", "off"]] and not api.state.menu and "theater-menu-ENTER" not in bindings)
-api, calls, msgs, bindings, osd, overlay, st, lua = world(uosc=False)
+check("Esc cancels the question and keeps the panel open", api.state.pending is None and api.state.menu)
+st["status"] = json.loads(json.dumps(STATUS))
+bindings["theater-menu-ENTER"](); st["status"]["dsp"]["pmode"] = "film"; bindings["theater-menu-ENTER"]()
+check("Enter twice runs `eq mode film`, leaves the panel open and re-reads the status",
+      [c for c in calls if c[1:2] == ["mode"]] == [["/bin/eq", "mode", "film"]] and api.state.menu and "film" in overlay.data.split("Profile mode")[1].split("\n")[0], overlay.data)
+bindings["theater-menu-LEFT"]()
+check("Left asks for the previous value (film -> auto)", api.state.pending is not None and "film -> auto" in overlay.data)
+bindings["theater-menu-ESC"](); bindings["theater-menu-ESC"]()
+check("a second Esc closes the panel and frees the keys", not api.state.menu and "theater-menu-ENTER" not in bindings and overlay.removed)
+api, calls, msgs, bindings, osd, overlay, st, lua = world()
 api.open_menu(); bindings["theater-menu-MBTN_LEFT"]()
-check("a left click on a row selects it (row 1 = first item, EQ on is already active, so nothing runs)", not [c for c in calls if c[1:2] == ["on"]])
-
-# ---- uosc menu
-api, calls, msgs, bindings, osd, overlay, st, lua = world(uosc=True)
-api.open_menu()
-m = [x for x in msgs if x[:2] == ["script-message-to", "uosc"]]
-check("with uosc installed, the menu goes to uosc's open-menu", len(m) == 1 and m[0][2] == "open-menu" and not api.state.menu)
-j = json.loads(m[0][3])
-risky = [e for e in j["items"] if e["title"] == "Mode: stereo"][0]
-check("risky entries are submenus: Continue (script-message-to this script) and Cancel", risky["items"][0]["value"][:3] == ["script-message-to", "theater_status", "do"] and risky["items"][1]["value"] == ["ignore"] and "silence" in risky["items"][0]["title"], str(risky))
-plain = [e for e in j["items"] if e["title"] == "EQ on"][0]
-check("EQ on is a direct entry marked active", plain["value"][3] == "1" and plain["active"] is True)
-bindings["msg:do"]("4")
-check("the 'do' message runs the matching action", [c for c in calls if c[1:2] == ["mode"]] == [["/bin/eq", "mode", "film"]], str(calls))
+check("a click on the title area runs nothing", not [c for c in calls if c[0] == "/bin/eq" and c[1] != "status"])
 
 # ---- no ctld: falls back to eq status --json
-api, calls, msgs, bindings, osd, overlay, st, lua = world(uosc=False, ctl=False)
+api, calls, msgs, bindings, osd, overlay, st, lua = world(ctl=False)
 api.open_menu()
 check("without theater-ctld the status comes from `eq status --json`", any(c[0] == "curl" for c in calls) and any(c[1:3] == ["status", "--json"] for c in calls) and api.state.status is not None)
 
