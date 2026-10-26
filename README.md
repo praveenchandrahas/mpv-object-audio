@@ -60,4 +60,4 @@ Change them for your display and install folder (`OA_HOME`).
 
 [Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE)). Dolby, Dolby Atmos, DTS and DTS:X are trademarks of their owners; this project is not affiliated with or endorsed by them. It contains no media files and no decoder code.
 
-Part of the [software-defined home theatre](https://github.com/praveenchandrahas/SDHT) project.
+Part of the [software-defined home theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.
