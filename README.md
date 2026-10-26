@@ -14,7 +14,7 @@ mpv-object-audio film.mkv                   # or right-click a film in Dolphin -
 Files: `scripts/object-audio-install.sh` (install, update, status, remove, deps), `scripts/mpv-object-audio` (the wrapper; `--oa-info`, `--oa-check`), `scripts/mpv-atmos` and
 `scripts/mpv-atmos-overlay-off.lua` (the earlier wrapper of the author's rig, kept for comparison), `docs/omniphony-debugging.md` (how the stack was built and debugged).
 
-It works alone. Optionally it calls `eq ensure` / `eq prepare FILE` from [theater-router](https://github.com/praveenchandrahas/theater-router) before playback (skipped when `eq` is not installed, or with `OBJECT_AUDIO_DSP=0`),
+It works alone. Optionally it calls `eq ensure` / `eq prepare FILE` from [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) before playback (skipped when `eq` is not installed, or with `OBJECT_AUDIO_DSP=0`),
 and [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) can add seek-bar thumbnails.
 
 ## How the installer works
