@@ -63,3 +63,15 @@ Change them for your display and install folder (`OA_HOME`).
 [Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE)). Dolby, Dolby Atmos, DTS and DTS:X are trademarks of their owners; this project is not affiliated with or endorsed by them. It contains no media files and no decoder code.
 
 Part of the [software-defined home theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.
+
+## On-screen status and controls (theater_status.lua)
+
+`scripts/theater_status.lua` adds an overlay to mpv: **F9** toggles a status panel (source, route, profile, engine, CamillaDSP load, clipping and
+underruns) and **F10** opens a control menu (EQ on/off, profile mode, upmix flavours, adaptive engine). It runs the `eq` command, so the router stays the only
+thing that changes the audio; with `theater-ctld` running (linux-theater-dsp) the panel also shows the live DSP numbers, otherwise it uses `eq status --json`.
+With uosc installed the menu is uosc's (mouse and keyboard); otherwise a built-in menu is drawn (arrow keys, Enter, Esc, mouse wheel and click). Changes that
+cost about a second of silence, and `eq off`, always ask for a second confirmation, because mpv is playing whenever the menu is open.
+
+Install: `./scripts/install-theater-status.sh` (copies the script into `~/.config/mpv` and `~/.config/mpv-object-audio`; `--bindings` also adds the two keys
+to each `input.conf`; `remove` undoes both). Options in `script-opts/theater_status.conf`: `eq`, `ctl_url`, `menu=auto|uosc|builtin`, `refresh`.
+Tested under a mocked mpv API only (`tests/test_theater_status.py`, needs `pip install lupa`); how it looks and behaves in the real player is unverified.
