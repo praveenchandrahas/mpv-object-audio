@@ -2,7 +2,7 @@
 
 ![mpv-object-audio: live object audio on Linux. Installer and wrapper for immersive audio and video playback](docs/img/banner.png)
 
-> **Part of the [Software Defined Home Theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.** The main repository holds the documentation, build log, results and the installer checks; this is one of its parts. Sibling repositories: [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) · [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) · [Roomtone](https://github.com/praveenchandrahas/Roomtone).
+> **Part of the [Software Defined Home Theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.** The main repository holds the documentation, build log, results and the installer checks; this is one of its parts. Sibling repositories: [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) (router and CamillaDSP configs) · [Roomtone](https://github.com/praveenchandrahas/Roomtone) (measurement, autocal, status page, mpv overlay) · [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) (seek-bar thumbnails) · [mpv-shelf](https://github.com/praveenchandrahas/mpv-shelf) (film browser for mpv).
 
 An installer and wrapper that gives a Linux machine a self-contained **live Dolby Atmos / DTS:X player**: the Omniphony object renderer, the harletty-bridge decoders and a patched mpv,
 installed in their own folder and started as the `mpv-object-audio` command, with a video configuration tuned for a 1080p projector (VAAPI, gpu-next on Vulkan, BT.709/BT.1886,
@@ -60,6 +60,13 @@ The installer downloads other projects; they keep their own licences (this repos
 | [mpv-omniphony](https://github.com/mgth/mpv-omniphony) | not checked here: an mpv fork, so GPL/LGPL-family; see its LICENSE |
 | [truehdd](https://github.com/truehdd/truehdd) (the decoder harletty's is a fork of) | Apache-2.0 |
 | [mpv](https://mpv.io) | GPL-2.0-or-later by default, LGPL-2.1-or-later when built that way (mpv's documentation) |
+
+## Optional companions (other repositories of the project)
+
+Two small mpv add-ons are built to work next to this player; neither is needed for Atmos, and neither has yet been confirmed in a real mpv session alongside it.
+
+- **[seekthumbs](https://github.com/praveenchandrahas/seekthumbs)**: preview thumbnails on the seek bar for a film library. `./seekthumbs.py install-viewer` writes into `~/.config/mpv-object-audio` by default, so it reaches films started with `mpv-atmos`.
+- **[mpv-shelf](https://github.com/praveenchandrahas/mpv-shelf)**: a poster browser for the same library (Ctrl+b). Its installer adds the script and the key to `~/.config/mpv`, and to `~/.config/mpv-object-audio` if that folder exists. It starts films by their real file path, so the codec-profile detection of the router (Atmos, DTS:X) and the wrapper's per-file handling are meant to keep working; whether they do when a film is started from the shelf has not been checked on the rig.
 
 ## Adapting it to your system
 
