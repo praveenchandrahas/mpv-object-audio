@@ -24,6 +24,8 @@ OA_HOME="${OA_HOME:-$HOME/.local/opt/mpv-object-audio}"
 OA_JOBS="${OA_JOBS:-$(nproc 2>/dev/null || echo 4)}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN="$HOME/.local/bin"
+# The Debian package sets OA_SYSTEM_WRAPPER=/usr/bin/mpv-object-audio: the command is then NOT copied into ~/.local/bin (a copy there would hide the packaged one).
+WRAPPER="${OA_SYSTEM_WRAPPER:-$BIN/mpv-object-audio}"
 APPS="$HOME/.local/share/applications"
 SVC="$HOME/.local/share/kio/servicemenus"
 CONF="$HOME/.config/mpv-object-audio"
@@ -167,9 +169,9 @@ EOF
 }
 
 install_wrapper() {
-    [ -f "$HERE/mpv-object-audio" ] || die "mpv-object-audio (the wrapper) must sit next to this script"
+    [ -n "${OA_SYSTEM_WRAPPER:-}" ] || [ -f "$HERE/mpv-object-audio" ] || die "mpv-object-audio (the wrapper) must sit next to this script"
     mkdir -p "$BIN" "$CONF/scripts"
-    install -m 755 "$HERE/mpv-object-audio" "$BIN/mpv-object-audio"
+    [ -n "${OA_SYSTEM_WRAPPER:-}" ] || install -m 755 "$HERE/mpv-object-audio" "$BIN/mpv-object-audio"
     [ -f "$CONF/mpv.conf" ] || printf '# mpv config for mpv-object-audio only. mpv-atmos and plain mpv read ~/.config/mpv instead.\n' > "$CONF/mpv.conf"
     # One-time snapshot of the current mpv setup (keys, the uosc on-screen UI, the overlay script) so the player feels the same. After this the two
     # folders are separate: editing one never changes the other. Nothing is overwritten on later runs.
@@ -192,7 +194,7 @@ Type=Application
 Name=mpv-object-audio
 GenericName=Object-audio media player
 Comment=mpv with live Atmos/object rendering through Omniphony
-Exec=$BIN/mpv-object-audio --force-window=yes -- %U
+Exec=$WRAPPER --force-window=yes -- %U
 Icon=mpv
 Terminal=false
 Categories=AudioVideo;Player;
@@ -201,7 +203,7 @@ Actions=Log;
 
 [Desktop Action Log]
 Name=Play with log in a terminal
-Exec=konsole --hold -e $BIN/mpv-object-audio --force-window=yes -v -- %U
+Exec=konsole --hold -e $WRAPPER --force-window=yes -v -- %U
 EOF
     # Dolphin right-click entries. Works on Plasma 5.27 and 6; Plasma 6 only honours service menus that are executable.
     cat > "$SVC/mpv-object-audio.desktop" <<EOF
@@ -217,17 +219,17 @@ Icon=mpv
 [Desktop Action oaPlay]
 Name=Play with mpv-object-audio
 Icon=media-playback-start
-Exec=$BIN/mpv-object-audio --force-window=yes -- %U
+Exec=$WRAPPER --force-window=yes -- %U
 
 [Desktop Action oaFs]
 Name=Play fullscreen
 Icon=view-fullscreen
-Exec=$BIN/mpv-object-audio --force-window=yes --fs -- %U
+Exec=$WRAPPER --force-window=yes --fs -- %U
 
 [Desktop Action oaLog]
 Name=Play with log in Konsole
 Icon=utilities-terminal
-Exec=konsole --hold -e $BIN/mpv-object-audio --force-window=yes -v -- %U
+Exec=konsole --hold -e $WRAPPER --force-window=yes -v -- %U
 
 [Desktop Action oaInfo]
 Name=Show audio streams (ffprobe) in Konsole
@@ -237,7 +239,7 @@ EOF
     chmod +x "$SVC/mpv-object-audio.desktop" "$APPS/mpv-object-audio.desktop"
     command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$APPS" 2>/dev/null || true
     for k in kbuildsycoca6 kbuildsycoca5; do command -v "$k" >/dev/null 2>&1 && { "$k" >/dev/null 2>&1 || true; break; }; done
-    echo "   command: $BIN/mpv-object-audio   (make sure $BIN is on PATH)"
+    echo "   command: $WRAPPER   (make sure it is on PATH)"
     echo "   menus:   $APPS/mpv-object-audio.desktop, $SVC/mpv-object-audio.desktop"
     echo "   Dolphin picks the menu up on its next window; if not, log out and in once."
 }
@@ -245,7 +247,7 @@ EOF
 do_status() {
     [ -d "$OA_HOME" ] || { echo "not installed ($OA_HOME missing)"; exit 1; }
     cat "$OA_HOME/VERSIONS" 2>/dev/null || echo "no VERSIONS file: the last install did not finish"
-    for f in "$BIN/mpv-object-audio" "$OA_HOME/bin/mpv" "$OA_HOME/lib/liborender.so.0" "$APPS/mpv-object-audio.desktop" "$SVC/mpv-object-audio.desktop"; do
+    for f in "$WRAPPER" "$OA_HOME/bin/mpv" "$OA_HOME/lib/liborender.so.0" "$APPS/mpv-object-audio.desktop" "$SVC/mpv-object-audio.desktop"; do
         [ -e "$f" ] && echo "OK    $f" || echo "MISSING $f"
     done
     smoke || true
@@ -253,7 +255,8 @@ do_status() {
 
 do_remove() {
     rm -rf "$OA_HOME"
-    rm -f "$BIN/mpv-object-audio" "$APPS/mpv-object-audio.desktop" "$SVC/mpv-object-audio.desktop"
+    [ -n "${OA_SYSTEM_WRAPPER:-}" ] || rm -f "$BIN/mpv-object-audio"
+    rm -f "$APPS/mpv-object-audio.desktop" "$SVC/mpv-object-audio.desktop"
     command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$APPS" 2>/dev/null || true
     echo "Removed the install, the command and the menu entries. Kept $CONF (your mpv-object-audio config)."
 }

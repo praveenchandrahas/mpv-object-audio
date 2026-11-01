@@ -1,5 +1,7 @@
 # mpv-object-audio
 
+[![CI](https://github.com/praveenchandrahas/mpv-object-audio/actions/workflows/ci.yml/badge.svg)](https://github.com/praveenchandrahas/mpv-object-audio/actions/workflows/ci.yml) *(CI = unit tests, lint, and a package install/remove test in a clean Ubuntu 24.04 container. A green badge does not show the software works on a real rig.)*
+
 ![mpv-object-audio: live object audio on Linux. Installer and wrapper for immersive audio and video playback](docs/img/banner.png)
 
 > **Part of the [Software Defined Home Theatre](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre) project.** The main repository holds the documentation, build log, results and the installer checks; this is one of its parts. Sibling repositories: [linux-theater-dsp](https://github.com/praveenchandrahas/linux-theater-dsp) (router and CamillaDSP configs) · [Roomtone](https://github.com/praveenchandrahas/Roomtone) (measurement, autocal, status page, mpv overlay) · [seekthumbs](https://github.com/praveenchandrahas/seekthumbs) (seek-bar thumbnails) · [mpv-shelf](https://github.com/praveenchandrahas/mpv-shelf) (film browser for mpv).
@@ -7,6 +9,22 @@
 An installer and wrapper that gives a Linux machine a self-contained **live Dolby Atmos / DTS:X player**: the Omniphony object renderer, the harletty-bridge decoders and a patched mpv,
 installed in their own folder and started as the `mpv-object-audio` command, with a video configuration tuned for a 1080p projector (VAAPI, gpu-next on Vulkan, BT.709/BT.1886,
 60 nit target peak, bt.2390 tone mapping, mitchell downscaling, deband).
+
+## Install (pre-release, experimental)
+
+Releases are marked **pre-release** on the [releases page](https://github.com/praveenchandrahas/mpv-object-audio/releases). Download the `.deb` and `SHA256SUMS` from one release, check, then install:
+
+```sh
+sha256sum -c --ignore-missing SHA256SUMS
+sudo apt install ./mpv-object-audio_0.1.0_all.deb
+mpv-object-audio-install --dry-run   # then: mpv-object-audio-install install
+```
+
+This package contains only the `mpv-object-audio` wrapper and the installer. It does **not** include or download mpv-omniphony, Omniphony or harletty-bridge; the installer runs only when you ask it to, and you should read it first (`/usr/lib/mpv-object-audio/object-audio-install.sh`). See the main repository's `docs/rebuild-checklist.md`.
+
+The package puts files under `/usr` only. Its install and remove scripts do not enable or start services, do not write into any home folder, and do not touch CamillaDSP or PipeWire configuration; the setup command above does the per-user part, and `--dry-run` shows what it would do first. Details, the other repositories' packages, and the one-command installer are in the main repository's [packaging notes](https://github.com/praveenchandrahas/Software-Defined-Home-Theatre/blob/main/docs/packaging.md).
+
+What was checked: written with an AI assistant; checked against simulated rooms and REW exports; used and checked by the author in his own room (one room, one author). No external or second-person validation yet. The packages are unsigned. CI installs and removes them in clean Ubuntu 24.04; the packaging itself has not been run on the author's own rig.
 
 ## Architecture
 

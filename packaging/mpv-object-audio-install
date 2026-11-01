@@ -1,0 +1,31 @@
+#!/bin/bash
+# mpv-object-audio-install: runs the packaged installer for ONE user. The package itself never does this.
+#
+#   mpv-object-audio-install --dry-run [install]   print what would be downloaded, built and written; do nothing
+#   mpv-object-audio-install [install|update]      install or update (downloads Omniphony and harletty-bridge releases, builds mpv; minutes)
+#   mpv-object-audio-install status | deps | remove
+#
+# Everything lands in ~/.local/opt/mpv-object-audio, ~/.config/mpv-object-audio and ~/.local/share/applications; mpv-atmos and plain mpv are
+# not touched. The command stays /usr/bin/mpv-object-audio (no copy in ~/.local/bin). `remove` keeps ~/.config/mpv-object-audio.
+set -u
+INSTALLER=/usr/lib/mpv-object-audio/object-audio-install.sh
+if [ "${1:-}" = "--dry-run" ] || [ "${2:-}" = "--dry-run" ]; then
+  OA=${OA_HOME:-$HOME/.local/opt/mpv-object-audio}
+  cat <<TXT
+Dry run: nothing is downloaded, built or written. "install" would:
+  - check the build tools (git, curl, unzip, python3, meson, ninja, pkg-config, cc); \`$0 deps\` prints the apt line
+  - download the latest release of mgth/Omniphony (liborender) and of harletty/harletty-bridge from github.com, with the installer's own checks
+  - build mgth/mpv-omniphony (mpv) from source in $OA/src (log: $OA/build.log)
+  - play a test tone to see that the engine and the bridges load, and refuse to install the command if they do not
+  - write $OA, ~/.config/mpv-object-audio (seeded once from ~/.config/mpv), ~/.local/share/applications/mpv-object-audio.desktop
+    and ~/.local/share/kio/servicemenus/mpv-object-audio.desktop
+  - NOT copy anything into ~/.local/bin; the command is /usr/bin/mpv-object-audio
+These are other people's programs. Read $INSTALLER before you run it.
+TXT
+  [ -x /usr/bin/mpv-object-audio ] && echo "packaged command: /usr/bin/mpv-object-audio" || echo "packaged command missing"
+  [ -e "$HOME/.local/bin/mpv-object-audio" ] && echo "NOTE: ~/.local/bin/mpv-object-audio exists; if ~/.local/bin is before /usr/bin on PATH it hides the packaged command."
+  exit 0
+fi
+[ "$(id -u)" != 0 ] || [ -n "${SDHT_ALLOW_ROOT:-}" ] || { echo "Run this as your normal user, not as root." >&2; exit 1; }
+[ -e "$HOME/.local/bin/mpv-object-audio" ] && echo "NOTE: ~/.local/bin/mpv-object-audio exists; it comes first on PATH and hides the packaged command. Remove it once you are happy with the packaged one."
+OA_SYSTEM_WRAPPER=/usr/bin/mpv-object-audio exec "$INSTALLER" "$@"
