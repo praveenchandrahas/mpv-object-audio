@@ -74,8 +74,8 @@ The installer downloads other projects; they keep their own licences (this repos
 | Component | Licence (as stated by the project; check the version you install) |
 |---|---|
 | [Omniphony](https://github.com/mgth/Omniphony) engine | GPL-3.0-or-later (its README); decoder bridges are loaded at run time and "may be licensed separately" |
-| [harletty-bridge](https://github.com/harletty/harletty-bridge) | not checked here: see its LICENSE |
-| [mpv-omniphony](https://github.com/mgth/mpv-omniphony) | not checked here: an mpv fork, so GPL/LGPL-family; see its LICENSE |
+| [harletty-bridge](https://github.com/harletty/harletty-bridge) | **checked 2026-11-04 — more than its top-level LICENSE suggests.** The repository's own LICENSE file is Apache-2.0, and most of its source is, but the actual bridge libraries it ships (`libharletty_{dolby,dts,iamf}_bridge.*`, including the one this installer loads) are **GPL-3.0-or-later** (see the repo's `LICENSES/binary-bridge.txt`): they link Omniphony's GPL `bridge_api` crate, which makes each library a combined GPL work, and the DTS bridge also statically links `dca` (LGPL-2.1-or-later, based on FFmpeg's DCA decoder). The repo's own text: "Linking these libraries into a proprietary program is not permitted." So the thing actually loaded at runtime is GPL, not Apache, despite the top-level badge. |
+| [mpv-omniphony](https://github.com/mgth/mpv-omniphony) | **checked 2026-11-04:** GPL-3.0-or-later (its README and `THIRD-PARTY-NOTICES.md`; a GPL-2.0-or-later mpv fork combined with GPL-3.0-or-later Omniphony code, which the project's own notice resolves to GPL-3.0-or-later overall for the built binary) |
 | [truehdd](https://github.com/truehdd/truehdd) (the decoder harletty's is a fork of) | Apache-2.0 |
 | [mpv](https://mpv.io) | GPL-2.0-or-later by default, LGPL-2.1-or-later when built that way (mpv's documentation) |
 
