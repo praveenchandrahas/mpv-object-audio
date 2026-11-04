@@ -12,3 +12,5 @@ __pycache__/
 *-cal.txt
 *.cal
 .env
+# mkdocs build output
+site/

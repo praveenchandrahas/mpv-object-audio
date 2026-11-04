@@ -3,7 +3,7 @@
 How the live Atmos decoder and renderer was brought up on Kubuntu 24.04, problem by problem. Compiled from the
 conversations of July to September 2026. Dates are those of the conversations; version numbers are as reported in them.
 Each entry says what was seen, what the cause was, and how it was confirmed. The stack is the work of other people
-(see the credits in the [README](../README.md#credits)); this log only records what happened on this machine.
+(see the credits in the [README](https://github.com/praveenchandrahas/mpv-object-audio#credits)); this log only records what happened on this machine.
 
 ## Stack and what each part does
 
