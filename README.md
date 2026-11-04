@@ -1,6 +1,6 @@
 # mpv-object-audio
 
-Full docs: https://praveenchandrahas.github.io/mpv-object-audio/
+**Full docs:** https://praveenchandrahas.github.io/mpv-object-audio/ — install, usage, and the Omniphony build/debugging log.
 
 [![CI](https://github.com/praveenchandrahas/mpv-object-audio/actions/workflows/ci.yml/badge.svg)](https://github.com/praveenchandrahas/mpv-object-audio/actions/workflows/ci.yml) *(CI = unit tests, lint, and a package install/remove test in a clean Ubuntu 24.04 container. A green badge does not show the software works on a real rig.)*
 
